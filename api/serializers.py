@@ -11,17 +11,17 @@ class AdSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-        ads = serializers.PrimaryKeyRelatedField(many=True, 
-        queryset=Advertisement.objects.all())
-        class Meta:
-            model = User
-            fields = ('id', 'username', 'password', 'ads')
+    ads = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Advertisement.objects.all())
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'password', 'ads')
         
-        def create(self, validated_data):
-            user=User.objects.create(username=validated_data['username']) 
-            user.set_password(validated_data['password'])
-            user.save()
-            return user 
+    def create(self, validated_data):
+        user = User.objects.create(username=validated_data['username'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
             
 
