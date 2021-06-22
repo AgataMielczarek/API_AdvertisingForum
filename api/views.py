@@ -63,9 +63,24 @@ class DisplayIndustry(APIView):
 
 class ListCreateUser(APIView):
     def get (self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(instance=users, many=True)
-        return Response (serializer.data)
+        if request.user.is_staff:
+            users = User.objects.all()
+            serializer = UserSerializer(instance=users, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'response': "You don't have permission to get this data"})
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.create(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
         
