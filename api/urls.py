@@ -12,4 +12,5 @@ urlpatterns = [
     path('create-user/', views.CreateUser.as_view()),
     path('get-token/', obtain_auth_token),
     path('my-ads/', views.ListMyAds.as_view()),
+    path('like/<int:pk>/', views.LikeAd.as_view()),
 ]

@@ -5,9 +5,8 @@ from .serializers import AdSerializer, UserSerializer
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import status
-from django.http import Http404
-from rest_framework.permissions import AllowAny
-
+from django.http.response import Http404
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 class ListCreateAds(APIView):
@@ -20,9 +19,9 @@ class ListCreateAds(APIView):
         serializer = AdSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response (data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response (data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RetrieveUpdateDeleteAd(APIView):
@@ -64,25 +63,26 @@ class RetrieveUpdateDeleteAd(APIView):
 
 class DisplayIndustry(APIView):
     def get(self, request, pk):
-            ads = Advertisement.objects.filter(industry=pk)
-            if ads.count() != 0:
-                serializer = AdSerializer(instance=ads, many=True)
-                return Response (data=serializer.data)
-            else:
-                return Response(status=status.HTTP_204_NO_CONTENT)
+        ads = Advertisement.objects.filter(industry=pk)
+        if ads.count() != 0:
+            serializer = AdSerializer(instance=ads, many=True)
+            return Response(data=serializer.data)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ListUsers(APIView):
     def get(self, request):
         if request.user.is_staff:
             users = User.objects.all()
-            serializer = UserSerializer(users, many=True)
-            return Response (serializer.data)
+            serializer = UserSerializer(instance=users, many=True)
+            return Response(serializer.data)
         else:
-            return Response({'response' : "You don't have permission to get this data."})
+            return Response({'response': "You don't have permission to get this data."})
 
 
 class CreateUser(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -99,20 +99,17 @@ class ListMyAds(APIView):
         return Response(serializer.data)
 
 
+class LikeAd(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        try:
+            ad = Advertisement.objects.get(pk=pk)
+        except Advertisement.DoesNotExist:
+            raise Http404
 
-        
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if ad.likes.filter(id=request.user.id).exists():
+            ad.likes.remove(request.user)
+            return Response({'action': 'Disliked'})  # odlubienie
+        else:
+            ad.likes.add(request.user)
+            return Response({'action': 'Liked'})
