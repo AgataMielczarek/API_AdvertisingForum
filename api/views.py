@@ -92,8 +92,11 @@ class CreateUser(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
+class ListMyAds(APIView):
+    def get(self, request):
+        ads = Advertisement.objects.filter(user=request.user)
+        serializer = AdSerializer(instance=ads, many=True)
+        return Response(serializer.data)
 
 
 
