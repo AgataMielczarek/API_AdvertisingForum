@@ -5,4 +5,4 @@ class AdForm(forms.ModelForm):
     class Meta:
         model = Advertisement
         #fields = ('company','address')
-        exclude = ('user',)
+        exclude = ('user', 'likes')
